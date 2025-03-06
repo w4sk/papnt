@@ -167,6 +167,7 @@ class NotionPropMaker:
             'Subject': to_notionprop(info.get('subject'), 'multi_select'),
             'id': to_notionprop(citekey, 'rich_text'),
             'entrytype': to_notionprop(entrytype, 'select'),
+            'registered_by': to_notionprop('hoge', 'rich_text'),
         }
         return {propnames.get(key) or key: value for key, value
                 in properties.items() if value is not None}
