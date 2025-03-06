@@ -25,7 +25,7 @@ setup(
     keywords='papnt',
     name='papnt',
     packages=find_packages(include=['papnt', 'papnt.*']),
-    url='https://github.com/issakuss/papnt',
+    url='https://github.com/w4sk/papnt',
     version=version,
     zip_safe=False,
 )
