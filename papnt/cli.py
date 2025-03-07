@@ -46,7 +46,7 @@ def paths(paths: str):
     SEP = ','
     paths = paths.split(SEP) if SEP in paths else [paths]
     for pdfpath in paths:
-        add_records_from_local_pdfpath(database, config['propnames'], pdfpath)
+        add_records_from_local_pdfpath(database, config['propnames'], pdfpath, config['misc']['registered_by'])
 
 
 @main.command()

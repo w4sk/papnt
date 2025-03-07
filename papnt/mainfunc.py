@@ -19,7 +19,7 @@ converter = PDF2ChildrenConverter(
 
 
 def add_records_from_local_pdfpath(
-        database: Database, propnames: dict, input_pdfpath: str | Path):
+        database: Database, propnames: dict, input_pdfpath: str | Path, registered_by: str = ''):
 
     input_pdfpath = Path(input_pdfpath)
     if input_pdfpath.is_dir():
@@ -37,7 +37,7 @@ def add_records_from_local_pdfpath(
         if doi is None:
             continue
         try:
-            prop = NotionPropMaker().from_doi(doi, propnames) | \
+            prop = NotionPropMaker().from_doi(doi, propnames, registered_by) | \
                    {'info': {'checkbox': True}}
         except Exception as e:
             logger.log_no_doi_info(doi)
