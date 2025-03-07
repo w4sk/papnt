@@ -61,12 +61,12 @@ class NotionPropMaker:
     def __init__(self):
         self.notes = []
 
-    def from_doi(self, doi: str, propnames: dict) -> dict:
+    def from_doi(self, doi: str, propnames: dict, registered_by: str) -> dict:
         if 'arXiv' in doi:
             doi_style_info = self._fetch_info_from_arxiv(doi)
         else:
             doi_style_info = self._fetch_info_from_doi(doi)
-        return self._make_properties(doi_style_info, propnames)
+        return self._make_properties(doi_style_info, propnames, registered_by)
 
     def _fetch_info_from_arxiv(self, doi: str) -> dict:
         doi = doi.replace('//', '/')
@@ -141,7 +141,7 @@ class NotionPropMaker:
 
         return citekey
 
-    def _make_properties(self, info: dict, propnames: dict):
+    def _make_properties(self, info: dict, propnames: dict, registered_by: str):
         authors = self._make_author_list(info['author'])
         first_author_lastname = authors[0].split(' ')[-1]
         year = int(info['published']['date-parts'][0][0])
@@ -167,7 +167,7 @@ class NotionPropMaker:
             'Subject': to_notionprop(info.get('subject'), 'multi_select'),
             'id': to_notionprop(citekey, 'rich_text'),
             'entrytype': to_notionprop(entrytype, 'select'),
-            'registered_by': to_notionprop('hoge', 'select'),
+            'registered_by': to_notionprop(registered_by, 'select'),
         }
         return {propnames.get(key) or key: value for key, value
                 in properties.items() if value is not None}
