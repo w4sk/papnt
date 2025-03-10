@@ -37,7 +37,8 @@ def add_records_from_local_pdfpath(
         if doi is None:
             continue
         try:
-            prop = NotionPropMaker().from_doi(doi, propnames, registered_by, pdf_path) | \
+            print(f"pdf_path: {pdf_path}")
+            prop = NotionPropMaker().from_doi(doi, propnames, registered_by, f"{pdf_path}") | \
                    {'info': {'checkbox': True}}
         except Exception as e:
             logger.log_no_doi_info(doi)
