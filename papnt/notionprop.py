@@ -61,7 +61,9 @@ class NotionPropMaker:
     def __init__(self):
         self.notes = []
 
-    def from_doi(self, doi: str, propnames: dict, registered_by: str = None, file_name: str = None, keywords:list = []) -> dict:
+    def from_doi(
+        self, doi: str, propnames: dict, registered_by: str = None, file_name: str = None, keywords: list = []
+    ) -> dict:
         if "arXiv" in doi:
             doi_style_info = self._fetch_info_from_arxiv(doi)
         else:
@@ -137,7 +139,7 @@ class NotionPropMaker:
 
         return citekey
 
-    def _make_properties(self, info: dict, propnames: dict, registered_by: str, file_name: str, keywords:list=[]):
+    def _make_properties(self, info: dict, propnames: dict, registered_by: str, file_name: str, keywords: list = []):
         authors = self._make_author_list(info["author"])
         first_author_lastname = authors[0].split(" ")[-1]
         year = int(info["published"]["date-parts"][0][0])
