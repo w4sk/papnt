@@ -46,6 +46,9 @@ def to_notionprop(
         case "rich_text":
             assert isinstance(content, str)
             return {"rich_text": [{"text": {"content": content}}]}
+        case "url":
+            assert isinstance(content, str)
+            return {"url": content}
         case "number":
             assert isinstance(content, (int, float))
             return {"number": content}
@@ -62,13 +65,19 @@ class NotionPropMaker:
         self.notes = []
 
     def from_doi(
-        self, doi: str, propnames: dict, registered_by: str = None, file_name: str = None, keywords: list = []
+        self,
+        doi: str,
+        propnames: dict,
+        registered_by: str = None,
+        file_name: str = None,
+        keywords: list = [],
+        pdf_url: str = "",
     ) -> dict:
         if "arXiv" in doi:
             doi_style_info = self._fetch_info_from_arxiv(doi)
         else:
             doi_style_info = self._fetch_info_from_doi(doi)
-        return self._make_properties(doi_style_info, propnames, registered_by, file_name, keywords)
+        return self._make_properties(doi_style_info, propnames, registered_by, file_name, keywords, pdf_url)
 
     def _fetch_info_from_arxiv(self, doi: str) -> dict:
         doi = doi.replace("//", "/")
@@ -139,15 +148,17 @@ class NotionPropMaker:
 
         return citekey
 
-    def _make_properties(self, info: dict, propnames: dict, registered_by: str, file_name: str, keywords: list = []):
+    def _make_properties(
+        self, info: dict, propnames: dict, registered_by: str, file_name: str, keywords: list = [], pdf_url: str = ""
+    ) -> dict:
         authors = self._make_author_list(info["author"])
         first_author_lastname = authors[0].split(" ")[-1]
-        year = int(info["published"]["date-parts"][0][0])
+        year = int(info["published"]["date-parts"][0][0]) if "published" in info else None
         record_name = first_author_lastname + str(year)
         entrytype = CROSSREF_TO_BIB.get(info["type"]) or "misc"
         citekey = self._make_citekey(first_author_lastname, info["title"][0], year)
         journal = info["container-title"]
-        journal = journal[0] if journal else None
+        journal = journal[0][:100] if journal else None
         properties = {
             "Name": to_notionprop(record_name, "title"),
             "doi": to_notionprop(info["DOI"], "rich_text"),
@@ -167,6 +178,7 @@ class NotionPropMaker:
             "registered_by": to_notionprop(registered_by, "select"),
             "file_name": to_notionprop(file_name, "rich_text"),
             "keywords": to_notionprop(keywords, "multi_select"),
+            "pdf_url": to_notionprop(pdf_url, "url"),
         }
         return {propnames.get(key) or key: value for key, value in properties.items() if value is not None}
 

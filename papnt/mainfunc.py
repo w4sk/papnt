@@ -18,7 +18,7 @@ converter = PDF2ChildrenConverter(load_config(Path(__file__).parent / "config.in
 
 
 def add_records_from_local_pdfpath(
-    database: Database, propnames: dict, input_pdfpath: str | Path, registered_by: str = "", keywords: list = []
+    database: Database, propnames: dict, input_pdfpath: str | Path, registered_by: str = "", keywords: list = [], pdf_url: str = ""
 ):
     results = {}
     input_pdfpath = Path(input_pdfpath)
@@ -36,7 +36,7 @@ def add_records_from_local_pdfpath(
             results[pdf_path.name] = False
             continue
         try:
-            prop = NotionPropMaker().from_doi(doi, propnames, registered_by, pdf_path.name, keywords) | {
+            prop = NotionPropMaker().from_doi(doi, propnames, registered_by, pdf_path.name, keywords, pdf_url) | {
                 "info": {"checkbox": True}
             }
         except Exception as e:
@@ -55,10 +55,11 @@ def add_records_from_local_pdfpath(
     return results
 
 
-def _update_record_from_doi(database: Database, doi: str, id_record: str, propnames: dict):
+def _update_record_from_doi(database: Database, doi: str, id_record: str, propnames: dict, registered_by: str = ""):
 
     prop_maker = NotionPropMaker()
     prop = prop_maker.from_doi(doi, propnames)
+    prop |= {"registered_by": to_notionprop(registered_by, "select")}
     prop |= {"info": {"checkbox": True}}
     try:
         database.update_properties(id_record, prop)
@@ -71,7 +72,7 @@ def _update_record_from_doi(database: Database, doi: str, id_record: str, propna
         raise ValueError(f"Error while updating record: {name}")
 
 
-def update_unchecked_records_from_doi(database: Database, propnames: dict):
+def update_unchecked_records_from_doi(database: Database, propnames: dict, registered_by: str = ""):
     filter = {
         "and": [
             {"property": "info", "checkbox": {"equals": False}},
@@ -80,7 +81,7 @@ def update_unchecked_records_from_doi(database: Database, propnames: dict):
     }
     for record in database.fetch_records(filter).db_results:
         doi = record["properties"]["DOI"]["rich_text"][0]["plain_text"]
-        _update_record_from_doi(database, doi, record["id"], propnames)
+        _update_record_from_doi(database, doi, record["id"], propnames, registered_by)
 
 
 def update_unchecked_records_from_uploadedpdf(database: Database, propnames: dict):
