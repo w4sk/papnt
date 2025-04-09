@@ -77,6 +77,7 @@ class NotionPropMaker:
             doi_style_info = self._fetch_info_from_arxiv(doi)
         else:
             doi_style_info = self._fetch_info_from_doi(doi)
+        print(f"doi style info: {doi_style_info}")
         return self._make_properties(doi_style_info, propnames, registered_by, file_name, keywords, pdf_url)
 
     def _fetch_info_from_arxiv(self, doi: str) -> dict:
@@ -178,7 +179,7 @@ class NotionPropMaker:
             "registered_by": to_notionprop(registered_by, "select"),
             "file_name": to_notionprop(file_name, "rich_text"),
             "keywords": to_notionprop(keywords, "multi_select"),
-            "pdf_url": to_notionprop(pdf_url, "url"),
+            "pdf_url": to_notionprop(pdf_url if pdf_url else None, "url"),
         }
         return {propnames.get(key) or key: value for key, value in properties.items() if value is not None}
 
