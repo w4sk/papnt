@@ -33,14 +33,14 @@ def add_records_from_local_pdfpath(
         logger.set_path(pdf_path)
         doi = pdf_to_doi(pdf_path) or logger.log_no_doi_extracted()
         if doi is None:
-            results[pdf_path.name] = None
+            results[pdf_path.name] = {"result": False, "page_url": None}
             continue
         try:
             prop = NotionPropMaker().from_doi(doi, propnames, registered_by, pdf_path.name, keywords, pdf_url) | {
                 "info": {"checkbox": True}
             }
         except Exception as e:
-            results[pdf_path.name] = None
+            results[pdf_path.name] = {"result": False, "page_url": None}
             logger.log_no_doi_info(doi)
             prop = to_notionprop(pdf_path.name, "title")
         created_result = database.create(prop)
@@ -49,7 +49,9 @@ def add_records_from_local_pdfpath(
         children = converter.convert(pdf_path)
         database.add_children(created_page_id, children, blocktype="toggle", title="Text extracted by GROBID")
         if results.get(pdf_path.name) is None:
-            results[pdf_path.name] = created_page_url
+            results[pdf_path.name] = {"result": True, "page_url": created_page_url}
+        elif results.get(pdf_path.name)["result"] is False:
+            results[pdf_path.name]["page_url"] = created_page_url
 
     shallowest_pdf = min(pdf_paths, key=lambda p: len(p.parts))
     logger.export_to_text(shallowest_pdf.parent)
